@@ -17,7 +17,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "sessions")
+@Table(name = "session")
 public class SessionEntity {
     
 

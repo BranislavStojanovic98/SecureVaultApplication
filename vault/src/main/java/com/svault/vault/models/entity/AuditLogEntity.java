@@ -16,7 +16,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "audit_logs")
+@Table(name = "audit_log")
 public class AuditLogEntity {
  
     @Id

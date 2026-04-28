@@ -21,7 +21,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "team_members")
+@Table(name = "team_member")
 public class TeamMemberEntity {
     
     @EmbeddedId

@@ -19,7 +19,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "secrets")
+@Table(name = "secret")
 public class SecretEntity {
     
     @Id
