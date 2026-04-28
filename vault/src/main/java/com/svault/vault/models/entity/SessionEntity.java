@@ -29,11 +29,10 @@ public class SessionEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity userId;
 
-    @Column(name = "access_token_hash", nullable = false)
-    private String accessTokenHash;
-
     @Column(name = "refresh_token_hash", nullable = false)
     private String refreshTokenHash;
+
+    private Boolean revoked;
 
     @Column(name = "ip_address")
     private String ipAddress;
@@ -45,5 +44,6 @@ public class SessionEntity {
     private Instant expiresAt;
 
     @CreationTimestamp
+    @Column(name = "created_at")
     private Instant createdAt;
 }

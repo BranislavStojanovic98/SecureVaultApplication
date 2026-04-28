@@ -9,13 +9,10 @@ public class SecretDTO {
 
     private Integer id;
     private Integer teamId;
-    private String teamName;
-    private String name;
-    private String encryptionAlgo;
-    private String keyDerivationAlgo;
+    private byte[] encryptedBlob;
+    private byte[] encryptedKey;
     private Integer createdById;
-    private String createdByUsername;
-    private boolean honeytoken;
+    private boolean isHoneytoken;
     private Instant createdAt;
     private Instant updatedAt;
 }

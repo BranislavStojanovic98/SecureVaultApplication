@@ -13,6 +13,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
@@ -26,19 +27,22 @@ public class TeamMemberEntity {
     @EmbeddedId
     private TeamMemberId id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("teamId")
+    @JoinColumn(name = "team_id")
+    private TeamEntity team;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TeamMemberRole role;
 
     @CreationTimestamp
+    @Column(name = "joined_at")
     private Instant joinedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("teamId")
-    private TeamEntity team;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId")
-    private UserEntity user;
 
 }

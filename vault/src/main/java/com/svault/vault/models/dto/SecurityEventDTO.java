@@ -9,7 +9,6 @@ public class SecurityEventDTO {
     
     private Integer id;
     private Integer userId;
-    private String username;
     private String ipAddress;
     private String eventType;
     private String description;

@@ -8,9 +8,8 @@ import lombok.Data;
 public class SecretShareDTO {
     
     private Integer secretId;
-    private String secretName;
     private Integer userId;
-    private String username;
-    private String encryptionAlgo;
+    private byte[] encryptedKey;
+    private byte[] keyVersion;
     private Instant createdAt;
 }

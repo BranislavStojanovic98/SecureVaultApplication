@@ -10,6 +10,5 @@ public class TeamDTO {
     private Integer id;
     private String name;
     private Integer createdById;
-    private String createdByUsername;
     private Instant createdAt;
 }

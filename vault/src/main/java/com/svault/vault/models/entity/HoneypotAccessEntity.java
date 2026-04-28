@@ -6,9 +6,11 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.svault.vault.models.keys.HoneypotAccessId;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
@@ -24,12 +26,15 @@ public class HoneypotAccessEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
+    @JoinColumn(name = "user_id")
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("secretsId")
+    @MapsId("secretId")
+    @JoinColumn(name = "secret_id")
     private SecretEntity secret;
 
     @CreationTimestamp
+    @Column(name = "accessed_at")
     private Instant accessedAt;
 }

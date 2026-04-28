@@ -37,11 +37,9 @@ public class SecretEntity {
     @Column(name = "encrypted_blob", nullable =  false)
     private byte[] encryptedBlob;
 
-    @Column(name = "encrypted_algo", nullable = false)
-    private String encryptedAlgo;
-
-    @Column(name = "key_derivation_algo", nullable = false)
-    private String keyDerivationAlgo;
+    @Lob
+    @Column(name = "encrypted_key", nullable = false)
+    private String encryptedkety;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
@@ -51,8 +49,10 @@ public class SecretEntity {
     private Boolean isHoneytoken = false;
 
     @CreationTimestamp
+    @Column(name = "created_at")
     private Instant createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private Instant updatedAt;
 }

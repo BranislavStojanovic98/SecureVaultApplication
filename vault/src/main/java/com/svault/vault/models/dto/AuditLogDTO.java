@@ -9,12 +9,9 @@ public class AuditLogDTO {
     
     private Integer id;
     private Integer userId;
-    private String username;
-    private String action;
-    private String targetType;
-    private Integer targetId;
-    private String metadata;
+    private String encryptedData;
     private String previousHash;
     private String currentHash;
+    private String signature;
     private Instant createdAt;
 }

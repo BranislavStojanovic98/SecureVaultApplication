@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SecretShareId implements Serializable {
     
-    private Integer secretsId;
+    private Integer secretId;
     private Integer userId;
 }

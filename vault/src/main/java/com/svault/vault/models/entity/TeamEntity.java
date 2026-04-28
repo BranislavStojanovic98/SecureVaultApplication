@@ -23,7 +23,7 @@ public class TeamEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String name;
 
     @ManyToOne
@@ -31,5 +31,6 @@ public class TeamEntity {
     private UserEntity createdBy;
 
     @CreationTimestamp
+    @Column(name = "created_at")
     private Instant createdAt;
 }

@@ -27,24 +27,19 @@ public class AuditLogEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @Column(nullable = false)
-    private String action;
+    @Column(name = "encrypted_data", nullable = false)
+    private String encryptedData;
 
-    @Column(name = "target_type", nullable = false)
-    private String targetType;
-
-    @Column(name = "target_id")
-    private Integer targetId;
-
-    @Column(columnDefinition = "JSON")
-    private String metadata;
-
-    @Column(name = "previous_hash")
+    @Column(name = "previous_hash", nullable = false)
     private String previousHash;
 
     @Column(name = "current_hash", nullable = false)
     private String currentHash;
 
+    @Column(nullable = false)
+    private String signature;
+
     @CreationTimestamp
+    @Column(name = "created_at")
     private Instant createdAt;
 }

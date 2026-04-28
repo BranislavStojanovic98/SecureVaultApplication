@@ -17,7 +17,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "security_events")
+@Table(name = "security_event")
 public class SecurityEventEntity {
     
     @Id
@@ -34,9 +34,9 @@ public class SecurityEventEntity {
     @Column(name = "event_type", nullable = false)
     private String eventType;
 
-    @Column(columnDefinition = "TEXT")
     private String description;
 
     @CreationTimestamp
+    @Column(name = "created_at")
     private Instant createdAt;
 }
