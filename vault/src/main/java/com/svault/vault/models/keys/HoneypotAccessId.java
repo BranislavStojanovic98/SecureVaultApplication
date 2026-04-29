@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class HoneypotAccessId implements Serializable {
     
     private Integer userId;
-    private Integer secretsId;
+    private Integer secretId;
 }
