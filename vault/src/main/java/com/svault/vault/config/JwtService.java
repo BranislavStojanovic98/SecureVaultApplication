@@ -34,14 +34,34 @@ public class JwtService {
         return claimsResolve.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generatePreAuthToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("stage", "PRE_AUTH");
+        
+        return generateToken(claims, userDetails);
+    }
+
+    public String generateFullAuthToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("stage", "FULL_AUTH");
+
+        if(userDetails instanceof UserEntity user) {
+            claims.put("role", user.getRole().toString());
+        }
+
+        return generateToken(claims, userDetails);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String userName = extractUsername(token);
         return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
+
+    public boolean isFullyAuthenticated(String token, UserDetails userDetails) {
+        Claims claims = extractAllClaims(token);
+        return "FULL_AUTH".equals(claims.get("stage"));
+    }
+    
 
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         if(userDetails instanceof UserEntity) {

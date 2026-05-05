@@ -18,4 +18,6 @@ public class UserDTO {
     private String publicKey;
     private Instant createdAt;
     private Instant updatedAt;
+
+    private String totpQrCode;
 }

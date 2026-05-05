@@ -14,10 +14,16 @@ import org.springframework.stereotype.Service;
 
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.models.dto.UserDTO;
+import com.svault.vault.models.entity.TotpAuthEntity;
 import com.svault.vault.models.entity.UserEntity;
 import com.svault.vault.models.mappers.UserMapper;
 import com.svault.vault.models.util.AsymetricKeyGenerator;
+import com.svault.vault.repositories.TotpAuthRepository;
 import com.svault.vault.repositories.UserRepository;
+import com.svault.vault.util.EncryptionService;
+import com.svault.vault.util.QrCodeGenerator;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
+import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +33,11 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TotpAuthRepository totpAuthRepository;
+
+    private final EncryptionService encryptionService;
 
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -56,6 +67,37 @@ public class UserService implements UserDetailsService {
 
         UserEntity saved = userRepository.save(user);
 
+
+        GoogleAuthenticator gAuth = new GoogleAuthenticator();
+        GoogleAuthenticatorKey key = gAuth.createCredentials();
+
+        String secret = key.getKey();
+        String encrypted = encryptionService.encrypt(secret);
+
+        TotpAuthEntity totp = new TotpAuthEntity();
+        totp.setUser(saved);
+        totp.setSecret(encrypted);
+        totpAuthRepository.save(totp);
+
+        String issuer = "SecureVault";
+        String account = saved.getEmail();
+
+        String otpAuthUrl = String.format(
+            "otpauth://totp/%s:%s?secret=%s&issuer=%s", 
+            issuer,
+            account,
+            secret,
+            issuer
+        );
+
+        String qrCode;
+
+        try {
+            qrCode = QrCodeGenerator.generateQRCode(otpAuthUrl, 250, 250);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate QR code", e);
+        }
+
         try {
             Path dir = Path.of("keys", String.valueOf(saved.getId()));
             if(!Files.exists(dir)) {
@@ -69,8 +111,10 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("Failed to store private key file", e);
         }
 
+        UserDTO dto = UserMapper.toDto(saved);
+        dto.setTotpQrCode(qrCode);
 
-        return UserMapper.toDto(saved);
+        return dto;
     }
 
     public UserDTO editUser(Integer id, UserDTO request) {

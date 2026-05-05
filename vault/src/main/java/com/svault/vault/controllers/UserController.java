@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.svault.vault.models.dto.UserDTO;
 import com.svault.vault.services.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,7 +23,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/create")
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO entity) {
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO entity) {
         UserDTO saved = userService.createUser(entity);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
