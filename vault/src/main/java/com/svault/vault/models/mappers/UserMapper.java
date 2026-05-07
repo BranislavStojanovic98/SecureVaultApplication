@@ -1,5 +1,7 @@
 package com.svault.vault.models.mappers;
 
+import java.util.Base64;
+
 import com.svault.vault.models.dto.UserDTO;
 import com.svault.vault.models.entity.UserEntity;
 
@@ -20,6 +22,7 @@ public class UserMapper {
         dto.setFrozen(entity.getIsFrozen());
 
         dto.setPublicKey(entity.getPublicKey());
+        dto.setSalt(entity.getSalt().toString());
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
 
@@ -41,6 +44,8 @@ public class UserMapper {
         entity.setIsFrozen(dto.isFrozen());
 
         entity.setPublicKey(dto.getPublicKey());
+        byte[] saltBytes = Base64.getDecoder().decode(dto.getSalt());
+        entity.setSalt(saltBytes);
         entity.setCreatedAt(dto.getCreatedAt());
         entity.setUpdatedAt(dto.getUpdatedAt());
 

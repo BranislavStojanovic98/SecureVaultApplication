@@ -53,6 +53,8 @@ public class UserEntity implements UserDetails {
     @Column(name = "public_key", nullable = false, columnDefinition = "TEXT")
     private String publicKey;
 
+    private byte[] salt;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;

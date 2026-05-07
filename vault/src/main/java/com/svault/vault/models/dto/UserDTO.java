@@ -16,6 +16,7 @@ public class UserDTO {
     private boolean isActive;
     private boolean isFrozen;
     private String publicKey;
+    private String salt;
     private Instant createdAt;
     private Instant updatedAt;
 

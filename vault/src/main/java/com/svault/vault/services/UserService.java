@@ -1,9 +1,6 @@
 package com.svault.vault.services;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.security.KeyPair;
+import java.util.Base64;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +14,6 @@ import com.svault.vault.models.dto.UserDTO;
 import com.svault.vault.models.entity.TotpAuthEntity;
 import com.svault.vault.models.entity.UserEntity;
 import com.svault.vault.models.mappers.UserMapper;
-import com.svault.vault.models.util.AsymetricKeyGenerator;
 import com.svault.vault.repositories.TotpAuthRepository;
 import com.svault.vault.repositories.UserRepository;
 import com.svault.vault.util.EncryptionService;
@@ -48,12 +44,6 @@ public class UserService implements UserDetailsService {
     
     public UserDTO createUser(UserDTO request) {
 
-        KeyPair keyPair = AsymetricKeyGenerator.generateKeyPair();
-
-        String publicKey = AsymetricKeyGenerator.encodePublicKey(keyPair.getPublic());
-        String privateKey = AsymetricKeyGenerator.encodePrivateKey(keyPair.getPrivate());
-
-
         UserEntity user = new UserEntity();
         user.setUsername(request.getUsername());
 
@@ -62,7 +52,11 @@ public class UserService implements UserDetailsService {
         user.setIsActive(true);
         user.setIsFrozen(false);
         user.setRole(request.getRole());
-        user.setPublicKey(publicKey);
+        user.setPublicKey(request.getPublicKey());
+
+        byte[] saltBytes = Base64.getDecoder().decode(request.getSalt());
+
+        user.setSalt(saltBytes);
         user.setUpdatedAt(request.getUpdatedAt());
 
         UserEntity saved = userRepository.save(user);
@@ -96,19 +90,6 @@ public class UserService implements UserDetailsService {
             qrCode = QrCodeGenerator.generateQRCode(otpAuthUrl, 250, 250);
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate QR code", e);
-        }
-
-        try {
-            Path dir = Path.of("keys", String.valueOf(saved.getId()));
-            if(!Files.exists(dir)) {
-                Files.createDirectories(dir);
-            }
-
-            Path file = dir.resolve("privateKey.pem");
-            Files.writeString(file, privateKey, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to store private key file", e);
         }
 
         UserDTO dto = UserMapper.toDto(saved);
