@@ -30,16 +30,9 @@ public class SecretEntity {
     @JoinColumn(name = "team_id", nullable = false)
     private TeamEntity team;
 
-    @Column(nullable = false)
-    private String name;
-
     @Lob
     @Column(name = "encrypted_blob", nullable =  false)
     private byte[] encryptedBlob;
-
-    @Lob
-    @Column(name = "encrypted_key", nullable = false)
-    private String encryptedkety;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)

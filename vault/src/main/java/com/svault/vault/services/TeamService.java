@@ -1,5 +1,8 @@
 package com.svault.vault.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.svault.vault.exceptions.NotFoundException;
@@ -47,6 +50,15 @@ public class TeamService {
         teamRepository.save(entity);
         
         return TeamMapper.toDto(entity);
+    }
+
+    public List<TeamDTO> findAllTeamsUserBelongsTo(Integer id) {
+        List<TeamEntity> teams = teamRepository.findAllByCreatedById(id);
+        List<TeamDTO> teamDTOs = new ArrayList<TeamDTO>();
+        teams.forEach(item -> {
+            teamDTOs.add(TeamMapper.toDto(item));
+        });
+        return teamDTOs;
     }
 
     public void addAdmin(TeamDTO request) {

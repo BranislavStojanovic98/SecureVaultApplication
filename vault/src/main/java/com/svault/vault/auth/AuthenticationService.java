@@ -1,7 +1,5 @@
 package com.svault.vault.auth;
 
-import java.util.Base64;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

@@ -29,6 +29,10 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public Integer extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("id", Integer.class));
+    }
+
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolve) {
         final Claims claims = extractAllClaims(token);
         return claimsResolve.apply(claims);
@@ -46,6 +50,7 @@ public class JwtService {
         claims.put("stage", "FULL_AUTH");
 
         if(userDetails instanceof UserEntity user) {
+            claims.put("id", user.getId());
             claims.put("role", user.getRole().toString());
         }
 
