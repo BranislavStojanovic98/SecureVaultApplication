@@ -34,9 +34,9 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    @GetMapping("/belongsTo/{id}")
+    @GetMapping("/createdTeam/{id}")
     public ResponseEntity<List<TeamDTO>> getAllTeamsUserBelongsTo(@PathVariable Integer id) {
-        List<TeamDTO> allTeams = teamService.findAllTeamsUserBelongsTo(id);
+        List<TeamDTO> allTeams = teamService.findAllTeamsUserCreated(id);
         return ResponseEntity.ok().body(allTeams);
     }
 
@@ -46,7 +46,7 @@ public class TeamController {
         String token = authHeader.substring(7);
         Integer userId = jwtService.extractUserId(token);
         
-        return ResponseEntity.ok().body(teamService.findAllTeamsUserBelongsTo(userId));
+        return ResponseEntity.ok().body(teamService.findAllTeamsUserCreated(userId));
     }
 
     @PutMapping("/edit/{id}")

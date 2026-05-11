@@ -2,6 +2,7 @@ package com.svault.vault.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.svault.vault.models.dto.UserDTO;
 import com.svault.vault.services.UserService;
+import com.svault.vault.util.PublicKeyResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +58,12 @@ public class UserController {
     public ResponseEntity<UserDTO> unfreezeUser(@PathVariable Integer id) {
         userService.unfreezeUser(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/public-key")
+    public ResponseEntity<PublicKeyResponse> getUserPublicKey(@PathVariable Integer id) {
+        PublicKeyResponse response = new PublicKeyResponse();
+        response.setPublicKey(userService.getPublicKey(id));
+        return ResponseEntity.ok().body(response);
     }
 }

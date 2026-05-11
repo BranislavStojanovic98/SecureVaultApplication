@@ -52,7 +52,7 @@ public class TeamService {
         return TeamMapper.toDto(entity);
     }
 
-    public List<TeamDTO> findAllTeamsUserBelongsTo(Integer id) {
+    public List<TeamDTO> findAllTeamsUserCreated(Integer id) {
         List<TeamEntity> teams = teamRepository.findAllByCreatedById(id);
         List<TeamDTO> teamDTOs = new ArrayList<TeamDTO>();
         teams.forEach(item -> {

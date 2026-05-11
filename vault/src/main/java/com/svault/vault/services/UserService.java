@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.svault.vault.auth.AuthRequest;
+import com.svault.vault.auth.SaltRequest;
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.models.dto.UserDTO;
 import com.svault.vault.models.entity.TotpAuthEntity;
@@ -47,7 +49,7 @@ public class UserService implements UserDetailsService {
         UserEntity user = new UserEntity();
         user.setUsername(request.getUsername());
 
-        user.setPasswordHash(encoder.encode(request.getPasswordHash()));
+        user.setPasswordHash(request.getPasswordHash());
         user.setEmail(request.getEmail());
         user.setIsActive(true);
         user.setIsFrozen(false);
@@ -139,5 +141,23 @@ public class UserService implements UserDetailsService {
         user.setId(id);
         user.setIsFrozen(false);
         userRepository.save(user);
+    }
+
+    public byte[] getSalt(String username) {
+        UserEntity entity = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("No user"));
+        byte[] salt = entity.getSalt();
+        return salt;
+    }
+
+    public String getPublicKey(Integer id) {
+        UserEntity user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("No user"));
+        return user.getPublicKey();
+    }
+
+    public boolean verifyMasterPassword(AuthRequest request) {
+        UserEntity user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new NotFoundException("No user"));
+        boolean valid = user.getPasswordHash().equals(request.getPassword());
+
+        return valid;
     }
 }

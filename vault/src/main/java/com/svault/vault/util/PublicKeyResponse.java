@@ -1,5 +1,4 @@
-package com.svault.vault.auth;
-
+package com.svault.vault.util;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +8,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChallengeResponse {
+public class PublicKeyResponse {
     
-    private String nonce;
+    private String publicKey;
+
 }

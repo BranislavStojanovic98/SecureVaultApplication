@@ -2,7 +2,6 @@ package com.svault.vault.auth;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import com.svault.vault.config.JwtService;
@@ -34,8 +33,9 @@ public class AuthenticationService {
 
     public LoginResponse login(AuthRequest request) {
         authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            new VerifierAuthToken(request.getUsername(), request.getPassword())
         );
+        
         var user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new NotFoundException());
 
         String preAuthJwt = jwtService.generatePreAuthToken(user);
@@ -43,7 +43,7 @@ public class AuthenticationService {
         return LoginResponse.builder().tempToken(preAuthJwt).build();
     }
 
-    public LoginResponse verify2fa(TwoFaRequest request) {
+    public JwtAuthResponse verify2fa(TwoFaRequest request) {
         
         String username = jwtService.extractUsername(request.getTempToken());
         var user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("No such username"));
@@ -60,9 +60,9 @@ public class AuthenticationService {
             throw new BadCredentialsException("Invalid 2FA code");
         }
 
-        String jwt = jwtService.generatePreAuthToken(user);
+        String jwt = jwtService.generateFullAuthToken(user);
         
-        return LoginResponse.builder().tempToken(jwt).salt(user.getSalt()).build();
+        return JwtAuthResponse.builder().token(jwt).salt(user.getSalt()).build();
     }
 
     public JwtAuthResponse verifySignature(SignatureRequest req) {

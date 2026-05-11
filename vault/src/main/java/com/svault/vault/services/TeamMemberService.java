@@ -1,6 +1,8 @@
 package com.svault.vault.services;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -66,5 +68,14 @@ public class TeamMemberService {
 
         entity.setRole(role.getRole());
         teamMemberRepository.save(entity);
+    }
+
+    public List<TeamMemberDTO> getAllTeamsUserIsIn(Integer id) {
+        List<TeamMemberEntity> teams = teamMemberRepository.findByUserId(id);
+        List<TeamMemberDTO> dtos = new ArrayList<TeamMemberDTO>();
+        for (TeamMemberEntity teamMemberEntity : teams) {
+            dtos.add(TeamMemberMapper.toDto(teamMemberEntity));
+        }
+        return dtos;
     }
 }
