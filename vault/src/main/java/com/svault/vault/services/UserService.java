@@ -10,7 +10,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.svault.vault.auth.AuthRequest;
-import com.svault.vault.auth.SaltRequest;
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.models.dto.UserDTO;
 import com.svault.vault.models.entity.TotpAuthEntity;

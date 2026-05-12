@@ -39,9 +39,6 @@ public class SecretShareEntity {
     @Column(name = "encrypted_key", nullable = false)
     private byte[] encryptedKey;
 
-    @Column(name = "key_version", nullable = false)
-    private Integer keyVersion;
-
     @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;

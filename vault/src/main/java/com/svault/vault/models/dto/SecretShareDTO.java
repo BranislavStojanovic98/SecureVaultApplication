@@ -10,6 +10,5 @@ public class SecretShareDTO {
     private Integer secretId;
     private Integer userId;
     private byte[] encryptedKey;
-    private Integer keyVersion;
     private Instant createdAt;
 }

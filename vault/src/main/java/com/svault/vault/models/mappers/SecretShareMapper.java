@@ -13,7 +13,6 @@ public class SecretShareMapper {
         dto.setSecretId(entity.getSecret().getId());
         dto.setUserId(entity.getUser().getId());
         dto.setEncryptedKey(entity.getEncryptedKey());
-        dto.setKeyVersion(entity.getKeyVersion());
         dto.setCreatedAt(entity.getCreatedAt());
 
         return dto;

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.svault.vault.config.JwtService;
 import com.svault.vault.models.dto.SecretDTO;
 import com.svault.vault.models.requests.SecretDeleteRequest;
+import com.svault.vault.models.util.CreateSecretWithShareRequest;
+import com.svault.vault.models.util.UserSecretDTO;
 import com.svault.vault.services.SecretService;
 
 import lombok.RequiredArgsConstructor;
@@ -36,13 +38,13 @@ public class SecretController {
     }
 
     @GetMapping("/byUser")
-    public ResponseEntity<List<SecretDTO>> getSecretsByUserId(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<UserSecretDTO>> getSecretsByUserId(
+            @RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.substring(7);
         Integer id = jwtService.extractUserId(token);
 
-        List<SecretDTO> secrets = secretService.getAllSecretsByUserId(id);
-        return ResponseEntity.ok().body(secrets);
+        return ResponseEntity.ok(secretService.getAllSecretsByUserId(id));
     }
 
 
@@ -54,14 +56,23 @@ public class SecretController {
 
     @PostMapping("/create")
     public ResponseEntity<SecretDTO> createSecret(@RequestBody SecretDTO req,
-                                                  @RequestHeader("Authorization") String authHeader
-    ) {
-
+                                                  @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
         Integer userId = jwtService.extractUserId(token);
 
         SecretDTO secret = secretService.createSecret(req, userId);
         return ResponseEntity.ok().body(secret);
+    }
+
+    @PostMapping("/create-with-share")
+    public ResponseEntity<SecretDTO> createWithShare(@RequestBody CreateSecretWithShareRequest request,
+                                                     @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        Integer creatorId = jwtService.extractUserId(token);
+
+        return ResponseEntity.ok(
+                secretService.createSecretWithShare(request, creatorId)
+        );
     }
 
     @PutMapping("editSecret/{id}")

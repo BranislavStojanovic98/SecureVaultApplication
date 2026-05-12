@@ -34,6 +34,9 @@ public class SecretEntity {
     @Column(name = "encrypted_blob", nullable =  false)
     private byte[] encryptedBlob;
 
+    @Lob
+    private byte[] iv;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private UserEntity user;

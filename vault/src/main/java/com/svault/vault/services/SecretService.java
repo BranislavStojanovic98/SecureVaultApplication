@@ -1,6 +1,8 @@
 package com.svault.vault.services;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -8,16 +10,23 @@ import org.springframework.stereotype.Service;
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.exceptions.NotValidException;
 import com.svault.vault.models.dto.SecretDTO;
+import com.svault.vault.models.dto.SecretShareDTO;
 import com.svault.vault.models.entity.SecretEntity;
+import com.svault.vault.models.entity.SecretShareEntity;
 import com.svault.vault.models.entity.TeamEntity;
 import com.svault.vault.models.entity.UserEntity;
 import com.svault.vault.models.enums.RoleName;
+import com.svault.vault.models.keys.SecretShareId;
 import com.svault.vault.models.mappers.SecretMapper;
 import com.svault.vault.models.requests.SecretDeleteRequest;
+import com.svault.vault.models.util.CreateSecretWithShareRequest;
+import com.svault.vault.models.util.UserSecretDTO;
 import com.svault.vault.repositories.SecretRepository;
+import com.svault.vault.repositories.SecretShareRepository;
 import com.svault.vault.repositories.TeamRepository;
 import com.svault.vault.repositories.UserRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,6 +35,7 @@ public class SecretService {
 
     private final TeamRepository teamRepository;
     private final SecretRepository secretRepository;
+    private final SecretShareRepository secretShareRepository;
     private final UserRepository userRepository;
     
     public SecretDTO createSecret(SecretDTO request, Integer userId) {
@@ -36,6 +46,7 @@ public class SecretService {
 
         entity.setTeam(team);
         entity.setEncryptedBlob(request.getEncryptedBlob());
+        entity.setIv(request.getIv());
         entity.setUser(user);
         entity.setIsHoneytoken(request.isHoneytoken());
         entity.setUpdatedAt(request.getUpdatedAt());
@@ -57,6 +68,7 @@ public class SecretService {
         }
 
         secret.setEncryptedBlob(request.getEncryptedBlob());
+        secret.setIv(request.getIv());
 
         secretRepository.save(secret);
 
@@ -92,14 +104,62 @@ public class SecretService {
         return secretDTOs;
     }
 
-    public List<SecretDTO> getAllSecretsByUserId(Integer userId) {
-        List<SecretEntity> secrets = secretRepository.findByUserId(userId);
-        List<SecretDTO> secretDTOs = new ArrayList<>();
-        
-        secrets.forEach(secret -> {
-            secretDTOs.add(SecretMapper.tDto(secret));
-        });
+    public List<UserSecretDTO> getAllSecretsByUserId(Integer userId) {
+        List<Object[]> results = secretRepository.findSecretsWithShare(userId);
 
-        return secretDTOs;
+        List<UserSecretDTO> dtos = new ArrayList<>();
+
+        for (Object[] row : results) {
+            SecretEntity secret = (SecretEntity) row[0];
+            SecretShareEntity share = (SecretShareEntity) row[1];
+
+            UserSecretDTO dto = new UserSecretDTO();
+            dto.setId(secret.getId());
+            dto.setTeamId(secret.getTeam().getId());
+            dto.setEncryptedBlob(Base64.getEncoder().encodeToString(secret.getEncryptedBlob()));
+            dto.setIv(Base64.getEncoder().encodeToString(secret.getIv()));
+            byte[] encrKey = share.getEncryptedKey();
+            String base64 = Base64.getEncoder().encodeToString(encrKey);
+            dto.setEncryptedKey(base64);
+
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
+
+    @Transactional
+    public SecretDTO createSecretWithShare(CreateSecretWithShareRequest request, Integer creatorId) {
+
+        UserEntity creator = userRepository.findById(creatorId).orElseThrow(() -> new NotFoundException("User not found"));
+        TeamEntity team = teamRepository.findById(request.getTeamId()).orElseThrow(() -> new NotFoundException("Team not found"));
+
+        SecretEntity secret = new SecretEntity();
+        secret.setTeam(team);
+        secret.setUser(creator);
+        secret.setEncryptedBlob(request.getEncryptedBlob());
+        secret.setIv(request.getIv());
+        secret.setCreatedAt(Instant.now());
+        secret.setUpdatedAt(Instant.now());
+
+        secretRepository.save(secret);
+
+        UserEntity reciver = userRepository.findById(request.getUserId()).orElseThrow(() -> new NotFoundException("Reciver not found"));
+
+        SecretShareEntity share = new SecretShareEntity();
+        share.setSecret(secret);
+        share.setUser(reciver);
+        share.setEncryptedKey(request.getEncryptedKey());
+        share.setCreatedAt(Instant.now());
+
+        SecretShareId id = new SecretShareId();
+        id.setSecretId(secret.getId());
+        id.setUserId(reciver.getId());
+
+        share.setId(id);
+
+        secretShareRepository.save(share);
+
+        return SecretMapper.tDto(secret);
     }
 }

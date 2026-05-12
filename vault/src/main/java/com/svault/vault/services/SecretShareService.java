@@ -27,12 +27,11 @@ public class SecretShareService {
         SecretShareEntity entity = new SecretShareEntity();
 
         SecretEntity secret = secretRepository.findById(dto.getSecretId()).orElseThrow(() -> new NotFoundException("No secret man"));
-        UserEntity user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new NotFoundException("No secret man"));
+        UserEntity user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new NotFoundException("No man man"));
 
         entity.setSecret(secret);
         entity.setUser(user);
         entity.setEncryptedKey(dto.getEncryptedKey());
-        entity.setKeyVersion(dto.getKeyVersion());
         entity.setCreatedAt(dto.getCreatedAt());
 
         SecretShareId secretShareId = new SecretShareId();

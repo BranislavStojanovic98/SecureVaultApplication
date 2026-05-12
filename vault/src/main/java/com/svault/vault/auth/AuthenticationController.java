@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.svault.vault.services.UserService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 @RestController
 @RequestMapping("/auth")

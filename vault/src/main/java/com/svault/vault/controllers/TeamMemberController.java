@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.svault.vault.config.JwtService;
-import com.svault.vault.models.dto.TeamDTO;
 import com.svault.vault.models.dto.TeamMemberDTO;
 import com.svault.vault.models.keys.TeamMemberId;
 import com.svault.vault.models.requests.NewRoleRequest;
