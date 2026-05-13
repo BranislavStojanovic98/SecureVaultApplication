@@ -10,4 +10,5 @@ import com.svault.vault.models.keys.TeamMemberId;
 public interface TeamMemberRepository extends JpaRepository<TeamMemberEntity, TeamMemberId>{
     
     List<TeamMemberEntity> findByUserId(Integer userId);
+    List<TeamMemberEntity> findAllByTeamId(Integer teamId);
 }

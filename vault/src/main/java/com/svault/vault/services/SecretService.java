@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.exceptions.NotValidException;
 import com.svault.vault.models.dto.SecretDTO;
-import com.svault.vault.models.dto.SecretShareDTO;
 import com.svault.vault.models.entity.SecretEntity;
 import com.svault.vault.models.entity.SecretShareEntity;
 import com.svault.vault.models.entity.TeamEntity;

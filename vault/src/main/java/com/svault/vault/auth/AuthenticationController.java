@@ -1,15 +1,24 @@
 package com.svault.vault.auth;
 
+import java.time.Duration;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.svault.vault.models.entity.UserEntity;
 import com.svault.vault.services.UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -33,8 +42,51 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify-2fa")
-    public ResponseEntity<JwtAuthResponse> verify2fa(@RequestBody TwoFaRequest request) {
-        return ResponseEntity.ok(authenticationService.verify2fa(request));
+    public ResponseEntity<JwtAuthResponse> verify2fa(
+        @RequestBody TwoFaRequest request,
+        HttpServletResponse response) {
+
+        JwtAuthResponse authResponse = authenticationService.verify2fa(request);
+
+        ResponseCookie cookie = ResponseCookie.from("jwt", authResponse.getToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(Duration.ofHours(1))
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok(authResponse);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> me(Authentication auth) {
+        UserEntity user = (UserEntity) auth.getPrincipal();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("userId", user.getId());
+        response.put("username", user.getUsername());
+        response.put("role", user.getRole());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok("Logged out");
     }
 
     @PostMapping("/verifySiginture")

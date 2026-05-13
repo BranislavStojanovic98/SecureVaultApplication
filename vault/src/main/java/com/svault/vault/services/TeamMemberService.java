@@ -78,4 +78,13 @@ public class TeamMemberService {
         }
         return dtos;
     }
+
+    public List<TeamMemberDTO> getAllTeamMembers(Integer id) {
+        List<TeamMemberEntity> teamMembers = teamMemberRepository.findAllByTeamId(id);
+        List<TeamMemberDTO> teammates = new ArrayList<TeamMemberDTO>();
+        for (TeamMemberEntity teamMemberEntity : teamMembers) {
+            teammates.add(TeamMemberMapper.toDto(teamMemberEntity));
+        }
+        return teammates;
+    }
 }

@@ -3,6 +3,7 @@ package com.svault.vault.controllers;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.svault.vault.config.JwtService;
 import com.svault.vault.models.dto.SecretDTO;
+import com.svault.vault.models.entity.UserEntity;
 import com.svault.vault.models.requests.SecretDeleteRequest;
 import com.svault.vault.models.util.CreateSecretWithShareRequest;
 import com.svault.vault.models.util.UserSecretDTO;
@@ -39,10 +41,10 @@ public class SecretController {
 
     @GetMapping("/byUser")
     public ResponseEntity<List<UserSecretDTO>> getSecretsByUserId(
-            @RequestHeader("Authorization") String authHeader) {
+            Authentication auth) {
 
-        String token = authHeader.substring(7);
-        Integer id = jwtService.extractUserId(token);
+        UserEntity user = (UserEntity) auth.getPrincipal();
+        Integer id = user.getId();
 
         return ResponseEntity.ok(secretService.getAllSecretsByUserId(id));
     }
@@ -66,9 +68,9 @@ public class SecretController {
 
     @PostMapping("/create-with-share")
     public ResponseEntity<SecretDTO> createWithShare(@RequestBody CreateSecretWithShareRequest request,
-                                                     @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7);
-        Integer creatorId = jwtService.extractUserId(token);
+                                                     Authentication auth) {
+        UserEntity user = (UserEntity) auth.getPrincipal();
+        Integer creatorId = user.getId();
 
         return ResponseEntity.ok(
                 secretService.createSecretWithShare(request, creatorId)
