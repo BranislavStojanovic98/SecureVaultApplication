@@ -12,6 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.svault.vault.services.UserService;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -34,7 +35,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
         String username = null;
 
         if(StringUtils.isNotEmpty(jwt)) {
-            username = jwtService.extractUsername(jwt);
+            try {
+                username = jwtService.extractUsername(jwt);
+            } catch(ExpiredJwtException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("TOKEN_EXPIRED");
+                return;
+            }
         }
 
         if(StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {

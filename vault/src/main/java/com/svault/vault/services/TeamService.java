@@ -2,6 +2,7 @@ package com.svault.vault.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -59,6 +60,16 @@ public class TeamService {
             teamDTOs.add(TeamMapper.toDto(item));
         });
         return teamDTOs;
+    }
+
+    public List<TeamDTO> getAllTeams() {
+        List<TeamEntity> teams =  teamRepository.findAll();
+        return teams.stream().map(TeamMapper::toDto).collect(Collectors.toList());
+    }
+
+    public TeamDTO getCertainTeam(Integer id) {
+        TeamEntity entity = teamRepository.findById(id).orElseThrow(() -> new NotFoundException("No team"));
+        return TeamMapper.toDto(entity);
     }
 
     public void addAdmin(TeamDTO request) {

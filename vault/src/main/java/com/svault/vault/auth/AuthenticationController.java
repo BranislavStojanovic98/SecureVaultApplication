@@ -80,8 +80,8 @@ public class AuthenticationController {
                 .httpOnly(true)
                 .secure(false)
                 .path("/")
+                .sameSite("Strict")
                 .maxAge(0)
-                .sameSite("Lax")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

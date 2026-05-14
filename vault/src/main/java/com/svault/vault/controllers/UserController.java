@@ -1,7 +1,10 @@
 package com.svault.vault.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.svault.vault.models.dto.UserDTO;
+import com.svault.vault.models.entity.UserEntity;
 import com.svault.vault.services.UserService;
 import com.svault.vault.util.PublicKeyResponse;
 
@@ -28,6 +32,13 @@ public class UserController {
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO entity) {
         UserDTO saved = userService.createUser(entity);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @GetMapping("/everyone")
+    public ResponseEntity<List<UserDTO>> getAllUsers(Authentication auth) {
+        UserEntity user = (UserEntity) auth.getPrincipal();
+        Integer userId = user.getId();
+        return ResponseEntity.ok().body(userService.getAllUsers(userId));
     }
 
     @PutMapping("/edit/{id}")

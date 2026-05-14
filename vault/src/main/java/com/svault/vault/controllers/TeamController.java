@@ -34,6 +34,16 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @GetMapping("/allteams")
+    public ResponseEntity<List<TeamDTO>> getAllTeams() {
+        return ResponseEntity.ok().body(teamService.getAllTeams());
+    }
+
+    @GetMapping("/teamno/{id}")
+    public ResponseEntity<TeamDTO> getCertainTeam(@PathVariable Integer id) {
+        return ResponseEntity.ok().body(teamService.getCertainTeam(id));
+    }
+
     @GetMapping("/createdTeam/{id}")
     public ResponseEntity<List<TeamDTO>> getAllTeamsUserBelongsTo(@PathVariable Integer id) {
         List<TeamDTO> allTeams = teamService.findAllTeamsUserCreated(id);

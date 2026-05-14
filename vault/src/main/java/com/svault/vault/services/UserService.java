@@ -1,6 +1,8 @@
 package com.svault.vault.services;
 
 import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -105,6 +107,11 @@ public class UserService implements UserDetailsService {
         if(!request.getUsername().isBlank() && !user.getUsername().equals(request.getUsername())) {
             user.setUsername(request.getUsername());
         }
+
+        if(!request.getRole().equals(null) && !user.getRole().equals(request.getRole())) {
+            user.setRole(request.getRole());
+        }
+
         user.setId(id);
         UserEntity saved = userRepository.save(user);
         return UserMapper.toDto(saved);
@@ -158,5 +165,12 @@ public class UserService implements UserDetailsService {
         boolean valid = user.getPasswordHash().equals(request.getPassword());
 
         return valid;
+    }
+
+    public List<UserDTO> getAllUsers(Integer userId) {
+        List<UserEntity> users = userRepository.findAll();
+        return users.stream().filter(user -> !user.getId().equals(userId)).map(UserMapper::toDto).collect(Collectors.toList());
+        
+
     }
 }

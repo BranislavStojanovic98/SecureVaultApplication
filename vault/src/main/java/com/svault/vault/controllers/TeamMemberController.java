@@ -29,9 +29,9 @@ public class TeamMemberController {
     
     private final TeamMemberService teamMemberService;
 
-    @PostMapping()
-    public ResponseEntity<TeamMemberDTO> createTeamMember(@RequestBody TeamMemberDTO requset) {
-        TeamMemberDTO saved = teamMemberService.addNewMember(requset);
+    @PostMapping("/addmember")
+    public ResponseEntity<TeamMemberDTO> createTeamMember(@RequestBody TeamMemberDTO request) {
+        TeamMemberDTO saved = teamMemberService.addNewMember(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
