@@ -37,6 +37,14 @@ public class SecretEntity {
     @Lob
     private byte[] iv;
 
+    @Lob
+    @Column(name = "wrapped_dek", nullable = false)
+    private byte[] wrappedDek;
+
+    @Lob
+    @Column(name = "wrapped_dek_iv", nullable = false)
+    private byte[] wrappedDekIv;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private UserEntity user;

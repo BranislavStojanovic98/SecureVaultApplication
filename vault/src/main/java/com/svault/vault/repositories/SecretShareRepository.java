@@ -11,5 +11,8 @@ import com.svault.vault.models.keys.SecretShareId;
 public interface SecretShareRepository extends JpaRepository<SecretShareEntity, SecretShareId> {
     
     @EntityGraph(attributePaths = {"secret", "user"})
-    List<SecretShareEntity> findAllByUserId(Integer id);
+    List<SecretShareEntity> findAllById_UserId(Integer userId);
+
+    @EntityGraph(attributePaths = {"secret", "user"})
+    List<SecretShareEntity> findAllById_SecretId(Integer secretId);
 }

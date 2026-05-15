@@ -12,6 +12,8 @@ public class SecretMapper {
         dto.setTeamId(entity.getTeam().getId());
         dto.setEncryptedBlob(entity.getEncryptedBlob());
         dto.setIv(entity.getIv());
+        dto.setWrappedDek(entity.getWrappedDek());
+        dto.setWrappedDekIv(entity.getWrappedDekIv());
         dto.setCreatedById(entity.getUser().getId());
         dto.setHoneytoken(entity.getIsHoneytoken());
         dto.setCreatedAt(entity.getCreatedAt());

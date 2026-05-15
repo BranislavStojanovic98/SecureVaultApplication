@@ -1,5 +1,6 @@
 package com.svault.vault.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import com.svault.vault.models.requests.SecretDeleteRequest;
 import com.svault.vault.models.util.CreateSecretWithShareRequest;
 import com.svault.vault.models.util.UserSecretDTO;
 import com.svault.vault.services.SecretService;
+import com.svault.vault.util.PublicKeyResponse;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -49,6 +51,16 @@ public class SecretController {
         return ResponseEntity.ok(secretService.getAllSecretsByUserId(id));
     }
 
+    @GetMapping("/byThisUser")
+    public ResponseEntity<List<SecretDTO>> getSecretsByThisUserId(
+            Authentication auth) {
+
+        UserEntity user = (UserEntity) auth.getPrincipal();
+        Integer id = user.getId();
+
+        return ResponseEntity.ok(secretService.getAllSecretsThisUserId(id));
+    }
+
 
     @GetMapping("/byTeam/{id}")
     public ResponseEntity<List<SecretDTO>> getSecretsByTeamId(@PathVariable Integer id) {
@@ -77,10 +89,20 @@ public class SecretController {
         );
     }
 
-    @PutMapping("editSecret/{id}")
-    public ResponseEntity<SecretDTO> editSecret(@PathVariable Integer id, @RequestBody SecretDTO request) {
-        SecretDTO dto = secretService.updateSecret(id, request);
-        return ResponseEntity.ok().body(dto);
+    @GetMapping("/shared-public-keys/{id}")
+    public ResponseEntity<List<PublicKeyResponse>> getAllSharedPublicKeys(@PathVariable Integer id) {
+        return ResponseEntity.ok().body(secretService.getAllPublicKeysFromSecretShare(id));
+    }
+
+    @PutMapping("/rotate-secret")
+    public ResponseEntity<List<SecretDTO>> editSecret(@RequestBody List<CreateSecretWithShareRequest> request,
+                                                Authentication auth) {
+        List<SecretDTO> secrets = new ArrayList<SecretDTO>();
+        for (CreateSecretWithShareRequest req : request) {
+            SecretDTO dto = secretService.rotateSecret(req.getId(), req);
+            secrets.add(dto);
+        }
+        return ResponseEntity.ok().body(secrets);
     }
 
     @DeleteMapping("/deleteSecret/{id}")

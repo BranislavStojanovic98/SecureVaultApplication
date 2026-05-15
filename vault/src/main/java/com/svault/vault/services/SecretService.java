@@ -4,11 +4,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.svault.vault.exceptions.NotFoundException;
-import com.svault.vault.exceptions.NotValidException;
 import com.svault.vault.models.dto.SecretDTO;
 import com.svault.vault.models.entity.SecretEntity;
 import com.svault.vault.models.entity.SecretShareEntity;
@@ -24,6 +24,7 @@ import com.svault.vault.repositories.SecretRepository;
 import com.svault.vault.repositories.SecretShareRepository;
 import com.svault.vault.repositories.TeamRepository;
 import com.svault.vault.repositories.UserRepository;
+import com.svault.vault.util.PublicKeyResponse;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,8 @@ public class SecretService {
         entity.setTeam(team);
         entity.setEncryptedBlob(request.getEncryptedBlob());
         entity.setIv(request.getIv());
+        entity.setWrappedDek(request.getWrappedDek());
+        entity.setWrappedDekIv(request.getWrappedDekIv());
         entity.setUser(user);
         entity.setIsHoneytoken(request.isHoneytoken());
         entity.setUpdatedAt(request.getUpdatedAt());
@@ -55,23 +58,39 @@ public class SecretService {
         return SecretMapper.tDto(entity);
     }
 
-    public SecretDTO updateSecret(Integer id, SecretDTO request) {
+    public SecretDTO rotateSecret(Integer id, CreateSecretWithShareRequest request) {
         SecretEntity secret = secretRepository.findById(id).orElseThrow(() -> new NotFoundException("No secret man!"));
-    
-        if(secret.getTeam().getId() != request.getTeamId()) {
-            throw new NotValidException("Not the same team!");
-        }
-
-        if(secret.getUser().getId() != request.getCreatedById()) {
-            throw new NotValidException("Not the same guy!");
-        }
 
         secret.setEncryptedBlob(request.getEncryptedBlob());
         secret.setIv(request.getIv());
+        secret.setWrappedDek(request.getWrappedDek());
+        secret.setWrappedDekIv(request.getWrappedDekIv());
+        secret.setUpdatedAt(Instant.now());
 
         secretRepository.save(secret);
 
+        
+
         return SecretMapper.tDto(secret);
+    }
+
+    public List<PublicKeyResponse> getAllPublicKeysFromSecretShare(Integer secretId) {
+
+        List<SecretShareEntity> allSharedSecrets = secretShareRepository.findAllById_SecretId(secretId);
+        List<UserEntity> allUsers = new ArrayList<UserEntity>();
+        for (SecretShareEntity secret : allSharedSecrets) {
+            allUsers.add(secret.getUser());
+        }
+
+        List<PublicKeyResponse> allPublicKeys = new ArrayList<PublicKeyResponse>();
+        for (UserEntity user : allUsers) {
+            PublicKeyResponse key = new PublicKeyResponse();
+            key.setUserId(user.getId());
+            key.setPublicKey(user.getPublicKey());
+            allPublicKeys.add(key);
+        }
+
+        return allPublicKeys;
     }
 
     public void deleteSecret(Integer id, SecretDeleteRequest request) {
@@ -101,6 +120,12 @@ public class SecretService {
         });
 
         return secretDTOs;
+    }
+
+    public List<SecretDTO> getAllSecretsThisUserId(Integer userId) {
+        List<SecretEntity> secrets = secretRepository.findByUserId(userId);
+        
+        return secrets.stream().map(SecretMapper::tDto).collect(Collectors.toList());
     }
 
     public List<UserSecretDTO> getAllSecretsByUserId(Integer userId) {
@@ -138,6 +163,8 @@ public class SecretService {
         secret.setUser(creator);
         secret.setEncryptedBlob(request.getEncryptedBlob());
         secret.setIv(request.getIv());
+        secret.setWrappedDek(request.getWrappedDek());
+        secret.setWrappedDekIv(request.getWrappedDekIv());
         secret.setCreatedAt(Instant.now());
         secret.setUpdatedAt(Instant.now());
 

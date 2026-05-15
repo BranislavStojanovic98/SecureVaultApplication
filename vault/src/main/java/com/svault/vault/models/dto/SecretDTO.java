@@ -11,6 +11,8 @@ public class SecretDTO {
     private Integer teamId;
     private byte[] encryptedBlob;
     private byte[] iv;
+    private byte[] wrappedDek;
+    private byte[] wrappedDekIv;
     private Integer createdById;
     private boolean isHoneytoken;
     private Instant createdAt;

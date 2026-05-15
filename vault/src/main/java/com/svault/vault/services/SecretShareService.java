@@ -32,7 +32,6 @@ public class SecretShareService {
         entity.setSecret(secret);
         entity.setUser(user);
         entity.setEncryptedKey(dto.getEncryptedKey());
-        entity.setCreatedAt(dto.getCreatedAt());
 
         SecretShareId secretShareId = new SecretShareId();
         secretShareId.setSecretId(dto.getSecretId());
