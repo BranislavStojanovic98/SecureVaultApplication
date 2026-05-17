@@ -57,6 +57,8 @@ public class JwtService {
         return generateToken(claims, userDetails);
     }
 
+    
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String userName = extractUsername(token);
         return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
@@ -76,7 +78,7 @@ public class JwtService {
         return Jwts.builder().claims(extraClaims)
                              .subject(userDetails.getUsername())
                              .issuedAt(new Date(System.currentTimeMillis()))
-                             .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                             .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))  // TODO namjesti vrijeme trajanja tokena, sada je 30 min
                              .signWith(getSigningKey())
                              .compact();
     }

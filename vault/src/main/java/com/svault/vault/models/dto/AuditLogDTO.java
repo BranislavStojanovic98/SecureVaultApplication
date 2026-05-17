@@ -12,6 +12,5 @@ public class AuditLogDTO {
     private String encryptedData;
     private String previousHash;
     private String currentHash;
-    private String signature;
     private Instant createdAt;
 }

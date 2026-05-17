@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.svault.vault.audit.AuditedAction;
 import com.svault.vault.auth.AuthRequest;
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.models.dto.UserDTO;
@@ -44,7 +45,13 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException());
     }
+
+    public UserDTO getUserByUsername(String username) {
+        UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException());
+        return UserMapper.toDto(user);
+    }
     
+    @AuditedAction("CREATE_USER")
     public UserDTO createUser(UserDTO request) {
 
         UserEntity user = new UserEntity();
@@ -101,6 +108,7 @@ public class UserService implements UserDetailsService {
         return dto;
     }
 
+    @AuditedAction("EDIT_USER")
     public UserDTO editUser(Integer id, UserDTO request) {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User does not exist"));
         
@@ -117,6 +125,7 @@ public class UserService implements UserDetailsService {
         return UserMapper.toDto(saved);
     }
     
+    @AuditedAction("ACTIVATE_USER")
     public void activateUser(Integer id) {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User does not exist"));
 
@@ -125,6 +134,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    @AuditedAction("DEACTIVATE_USER")
     public void deactivateUser(Integer id) {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User does not exist"));
 
@@ -133,6 +143,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    @AuditedAction("FREEZE_USER")
     public void freezeUser(Integer id) {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User does not exist"));
 
@@ -141,6 +152,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    @AuditedAction("UNFREEZE_USER")
     public void unfreezeUser(Integer id) {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User does not exist"));
 

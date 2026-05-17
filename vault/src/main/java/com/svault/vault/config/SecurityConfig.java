@@ -29,6 +29,7 @@ public class SecurityConfig {
     @Autowired
     VerifierAuthProvider verifierAuthProvider;
 
+    //TODO do proper security last
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())

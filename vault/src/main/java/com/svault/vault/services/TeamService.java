@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.svault.vault.audit.AuditedAction;
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.models.dto.TeamDTO;
 import com.svault.vault.models.dto.TeamMemberDTO;
@@ -27,6 +28,7 @@ public class TeamService {
 
     private final TeamMemberService teamMemberService;
     
+    @AuditedAction("CREATE_TEAM")
     public TeamDTO createTeam(TeamDTO request) {
 
         TeamEntity team = new TeamEntity();

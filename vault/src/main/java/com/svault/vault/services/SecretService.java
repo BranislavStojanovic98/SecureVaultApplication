@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.svault.vault.audit.AuditedAction;
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.models.dto.SecretDTO;
 import com.svault.vault.models.entity.SecretEntity;
@@ -58,6 +59,7 @@ public class SecretService {
         return SecretMapper.tDto(entity);
     }
 
+    @AuditedAction("ROTATED_SECRET")
     public SecretDTO rotateSecret(Integer id, CreateSecretWithShareRequest request) {
         SecretEntity secret = secretRepository.findById(id).orElseThrow(() -> new NotFoundException("No secret man!"));
 
@@ -152,6 +154,7 @@ public class SecretService {
         return dtos;
     }
 
+    @AuditedAction("CREATED_SECRET")
     @Transactional
     public SecretDTO createSecretWithShare(CreateSecretWithShareRequest request, Integer creatorId) {
 

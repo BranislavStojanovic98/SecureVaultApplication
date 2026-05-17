@@ -2,6 +2,7 @@ package com.svault.vault.services;
 
 import org.springframework.stereotype.Service;
 
+import com.svault.vault.audit.AuditedAction;
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.models.dto.SecretShareDTO;
 import com.svault.vault.models.entity.SecretEntity;
@@ -23,6 +24,7 @@ public class SecretShareService {
     private final SecretRepository secretRepository;
     private final UserRepository userRepository;
 
+    @AuditedAction("SHARED_SECRET")
     public SecretShareDTO createSecretShare(SecretShareDTO dto) {
         SecretShareEntity entity = new SecretShareEntity();
 

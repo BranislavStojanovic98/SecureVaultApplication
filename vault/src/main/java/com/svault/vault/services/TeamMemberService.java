@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.svault.vault.audit.AuditedAction;
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.models.dto.TeamMemberDTO;
 import com.svault.vault.models.entity.TeamEntity;
@@ -28,6 +29,7 @@ public class TeamMemberService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
 
+    @AuditedAction("ADDED_NEW_MEMBER")
     public TeamMemberDTO addNewMember(TeamMemberDTO request){
         
         TeamMemberEntity teamMember = new TeamMemberEntity();
@@ -52,6 +54,7 @@ public class TeamMemberService {
         return TeamMemberMapper.toDto(teamMember);
     }
 
+    @AuditedAction("REMOVED_MEMBER")
     public void removeMember(TeamMemberId requset) {
         TeamMemberEntity entity = teamMemberRepository.findById(requset).orElseThrow(() -> new NotFoundException("No team member"));
         if(entity == null) return;

@@ -7,6 +7,10 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.0.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
 	</parent>
 	<groupId>com.svault</groupId>
 	<artifactId>vault</artifactId>

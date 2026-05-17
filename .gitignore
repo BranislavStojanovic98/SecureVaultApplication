@@ -1,5 +1,6 @@
 db/SecureVault.mwb.bak
 db/SecureVault.mwb
 db/
+auditCheckpoints/
 keys/
 .env

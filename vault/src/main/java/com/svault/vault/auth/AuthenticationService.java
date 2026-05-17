@@ -10,6 +10,7 @@ import com.svault.vault.models.entity.TotpAuthEntity;
 import com.svault.vault.models.entity.UserEntity;
 import com.svault.vault.repositories.TotpAuthRepository;
 import com.svault.vault.repositories.UserRepository;
+import com.svault.vault.services.AuditLogService;
 import com.svault.vault.util.ChallengeStore;
 import com.svault.vault.util.CryptoService;
 import com.svault.vault.util.EncryptionService;
@@ -30,6 +31,7 @@ public class AuthenticationService {
     private final GoogleAuthenticator googleAuthenticator;
     private final ChallengeStore challengeStore;
     private final CryptoService cryptoService;
+    private final AuditLogService auditLogService;
 
     public LoginResponse login(AuthRequest request) {
         authenticationManager.authenticate(
@@ -37,8 +39,10 @@ public class AuthenticationService {
         );
         
         var user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new NotFoundException());
-
+        Integer userId = user.getId();
         String preAuthJwt = jwtService.generatePreAuthToken(user);
+
+        auditLogService.createLog(userId, "LOGGIN_ATTEMPT_BASIC");
 
         return LoginResponse.builder().tempToken(preAuthJwt).build();
     }
@@ -55,12 +59,15 @@ public class AuthenticationService {
         int code = Integer.parseInt(request.getCode());
         boolean valid = googleAuthenticator.authorize(secret, code);
 
+        auditLogService.createLog(user.getId(), "LOGGIN_ATTEMPT_2FA");
+
                                    
         if(!valid) {
             throw new BadCredentialsException("Invalid 2FA code");
         }
 
         String jwt = jwtService.generateFullAuthToken(user);
+        auditLogService.createLog(user.getId(), "LOGGIN_SUCCESS");
         
         return JwtAuthResponse.builder().token(jwt).salt(user.getSalt()).build();
     }
