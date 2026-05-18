@@ -25,6 +25,7 @@ import com.svault.vault.repositories.SecretRepository;
 import com.svault.vault.repositories.SecretShareRepository;
 import com.svault.vault.repositories.TeamRepository;
 import com.svault.vault.repositories.UserRepository;
+import com.svault.vault.util.NotificationService;
 import com.svault.vault.util.PublicKeyResponse;
 
 import jakarta.transaction.Transactional;
@@ -38,6 +39,7 @@ public class SecretService {
     private final SecretRepository secretRepository;
     private final SecretShareRepository secretShareRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
     
     public SecretDTO createSecret(SecretDTO request, Integer userId) {
         SecretEntity entity = new SecretEntity();
@@ -113,19 +115,26 @@ public class SecretService {
         return SecretMapper.tDto(entity);
     }
 
-    public List<SecretDTO> getAllSecretsByTeamId(Integer teamId) {
+    @AuditedAction("FETCH_HONEYTOKEN")
+    public List<SecretDTO> getAllSecretsByTeamId(Integer teamId, UserEntity user) {
         List<SecretEntity> secrets = secretRepository.findByTeamId(teamId);
-        List<SecretDTO> secretDTOs = new ArrayList<>();
-        
-        secrets.forEach(secret -> {
-            secretDTOs.add(SecretMapper.tDto(secret));
-        });
 
-        return secretDTOs;
+        boolean triggered = secrets.stream().anyMatch(SecretEntity::getIsHoneytoken);
+        
+        if(triggered) {
+            user.setIsFrozen(true);
+            userRepository.save(user);
+
+            notificationService.notifyAdmins("Honeytoken triggered by user.");
+
+            return List.of();
+        }
+
+        return secrets.stream().map(SecretMapper::tDto).collect(Collectors.toList());
     }
 
     public List<SecretDTO> getAllSecretsThisUserId(Integer userId) {
-        List<SecretEntity> secrets = secretRepository.findByUserId(userId);
+        List<SecretEntity> secrets = secretRepository.findByUserIdAndIsHoneytokenFalse(userId);
         
         return secrets.stream().map(SecretMapper::tDto).collect(Collectors.toList());
     }

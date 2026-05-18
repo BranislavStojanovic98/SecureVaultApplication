@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.svault.vault.models.dto.UserDTO;
 import com.svault.vault.services.UserService;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -38,14 +39,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
             try {
                 username = jwtService.extractUsername(jwt);
             } catch(ExpiredJwtException e) {
+                SecurityContextHolder.clearContext();
+
+                Cookie cookieJwt = new Cookie("jwt", null);
+                cookieJwt.setPath("/");
+                cookieJwt.setMaxAge(0);
+                response.addCookie(cookieJwt);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("TOKEN_EXPIRED");
                 return;
             }
         }
 
+        if(username != null)
+        {
+            UserDTO userCheck = userService.getUserByUsername(username);
+
+            if(userCheck != null && Boolean.TRUE.equals(userCheck.isFrozen())) {
+                SecurityContextHolder.clearContext();
+
+                Cookie cookieJwt = new Cookie("jwt", null);
+                cookieJwt.setPath("/");
+                cookieJwt.setMaxAge(0);
+                response.addCookie(cookieJwt);
+
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write("ACCOUNT_FROZEN");
+                return;
+            }
+        }
+
         if(StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userService.loadUserByUsername(username);
+
 
             if(jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

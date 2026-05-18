@@ -13,12 +13,14 @@ import com.svault.vault.models.entity.SecretEntity;
 public interface SecretRepository extends JpaRepository<SecretEntity, Integer>{
     
     @EntityGraph(attributePaths = {"team", "user"})
-    public Optional<SecretEntity> findById(Integer id);
+    public Optional<SecretEntity> findByIdAndIsHoneytokenFalse(Integer id);
+    @EntityGraph(attributePaths = {"team"})
+    public List<SecretEntity> findByTeamIdAndIsHoneytokenFalse(Integer id);
     @EntityGraph(attributePaths = {"team"})
     public List<SecretEntity> findByTeamId(Integer id);
     @EntityGraph(attributePaths = {"user"})
-    public List<SecretEntity> findByUserId(Integer id);
-    public List<SecretEntity> findByIsHoneytoken(Boolean bool);
+    public List<SecretEntity> findByUserIdAndIsHoneytokenFalse(Integer id);
+    public List<SecretEntity> findByIsHoneytokenTrue();
 
     @Query("""
     SELECT s, sh
@@ -26,6 +28,7 @@ public interface SecretRepository extends JpaRepository<SecretEntity, Integer>{
     JOIN SecretShareEntity sh
     ON s.id = sh.secret.id
     WHERE sh.user.id = :userId
+        AND s.isHoneytoken = false
     """)
     List<Object[]> findSecretsWithShare(@Param("userId") Integer userId);
 }

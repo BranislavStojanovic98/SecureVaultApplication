@@ -1,7 +1,5 @@
 package com.svault.vault.audit;
 
-import java.util.Arrays;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -49,10 +47,7 @@ public class AuditAspect {
             String username = user.getUsername();
             Integer userId = userService.getUserByUsername(username).getId();
 
-            String payload =
-                    "action=" + action +
-                    ",args=" + Arrays.toString(joinPoint.getArgs()) +
-                    ",user=" + username;
+            String payload = action;
 
             auditLogService.createLog(userId, payload);
 

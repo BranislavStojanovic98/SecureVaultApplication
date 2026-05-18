@@ -29,9 +29,13 @@ public class AuditLogService {
     private static final int CHECKPOINT_INTERVAL = 10;
 
 
+    //TODO FIX Audit Log when rotating DEKs
     public AuditLogDTO createLog(Integer userId, String jsonPayload) {
-        String encrypted = auditLogCrypto.encrypt(jsonPayload);
+        
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("No user for audti"));
+
+        String payload = jsonPayload + " DONE BY USER " + userId;
+        String encrypted = auditLogCrypto.encrypt(payload);
 
         AuditLogEntity last = auditLogRepository.findTopByOrderByIdDesc();
 
@@ -55,8 +59,6 @@ public class AuditLogService {
 
         return AuditLogMapper.toDto(saved);
     }
-
-    
 
     public boolean verifyChain() {
 
@@ -82,5 +84,17 @@ public class AuditLogService {
         }
 
         return true;
+    }
+
+    public List<AuditLogDTO> getAllDecryptedLogs() {
+        return auditLogRepository.findAll()
+        .stream()
+        .map(log -> {
+            String decrypted = auditLogCrypto.decrypt(log.getEncryptedData());
+            AuditLogDTO dto = AuditLogMapper.toDto(log);
+            dto.setDecryptedPayload(decrypted);
+            return dto;
+        })
+        .toList();
     }
 }

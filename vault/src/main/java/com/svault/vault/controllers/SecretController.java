@@ -63,8 +63,11 @@ public class SecretController {
 
 
     @GetMapping("/byTeam/{id}")
-    public ResponseEntity<List<SecretDTO>> getSecretsByTeamId(@PathVariable Integer id) {
-        List<SecretDTO> secrets = secretService.getAllSecretsByTeamId(id);
+    public ResponseEntity<List<SecretDTO>> getSecretsByTeamId(@PathVariable Integer id, Authentication auth) {
+
+        UserEntity user = (UserEntity) auth.getPrincipal();
+
+        List<SecretDTO> secrets = secretService.getAllSecretsByTeamId(id, user);
         return ResponseEntity.ok().body(secrets);
     }
 

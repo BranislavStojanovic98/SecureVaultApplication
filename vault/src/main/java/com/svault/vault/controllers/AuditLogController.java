@@ -1,5 +1,8 @@
 package com.svault.vault.controllers;
 
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.svault.vault.models.dto.AuditLogDTO;
 import com.svault.vault.models.dto.UserDTO;
-import com.svault.vault.models.entity.UserEntity;
 import com.svault.vault.models.requests.DecryptAuditRequest;
 import com.svault.vault.services.AuditLogService;
 import com.svault.vault.services.UserService;
@@ -40,5 +43,11 @@ public class AuditLogController {
                 user.getId(),
                 "DECRYPT_SECRET id=" + req.getSecretId()
         );
+    }
+
+    @GetMapping("/audit-logs")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<AuditLogDTO> getAuditLogs() {
+        return auditLogService.getAllDecryptedLogs();
     }
 }

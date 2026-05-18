@@ -10,6 +10,7 @@ public class AuditLogDTO {
     private Integer id;
     private Integer userId;
     private String encryptedData;
+    private String decryptedPayload;
     private String previousHash;
     private String currentHash;
     private Instant createdAt;

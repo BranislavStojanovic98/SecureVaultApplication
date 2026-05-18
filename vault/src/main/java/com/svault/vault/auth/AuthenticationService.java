@@ -40,6 +40,11 @@ public class AuthenticationService {
         
         var user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new NotFoundException());
         Integer userId = user.getId();
+
+        if(!user.getIsActive() || user.getIsFrozen()) {
+            throw new BadCredentialsException("Account is not valid");
+        }
+
         String preAuthJwt = jwtService.generatePreAuthToken(user);
 
         auditLogService.createLog(userId, "LOGGIN_ATTEMPT_BASIC");
