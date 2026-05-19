@@ -35,7 +35,11 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
         .cors(cors -> cors.configure(http))
             .authorizeHttpRequests((authorize) -> authorize
-                    .anyRequest().permitAll()
+                    .requestMatchers("/auth/register").permitAll()
+                    .requestMatchers("/auth/salt").permitAll()
+                    .requestMatchers("/auth/login").permitAll()
+                    .requestMatchers("/auth/verify-2fa").permitAll()
+                    .anyRequest().authenticated()
         )
         .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(verifierAuthProvider)

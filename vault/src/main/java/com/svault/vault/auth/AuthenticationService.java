@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 
 import com.svault.vault.config.JwtService;
 import com.svault.vault.exceptions.NotFoundException;
+import com.svault.vault.exceptions.TooManyAttemptsException;
 import com.svault.vault.models.entity.TotpAuthEntity;
 import com.svault.vault.models.entity.UserEntity;
+import com.svault.vault.redis.LoginAttemptService;
 import com.svault.vault.repositories.TotpAuthRepository;
 import com.svault.vault.repositories.UserRepository;
 import com.svault.vault.services.AuditLogService;
@@ -16,6 +18,7 @@ import com.svault.vault.util.CryptoService;
 import com.svault.vault.util.EncryptionService;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.var;
 
@@ -32,11 +35,24 @@ public class AuthenticationService {
     private final ChallengeStore challengeStore;
     private final CryptoService cryptoService;
     private final AuditLogService auditLogService;
+    private final LoginAttemptService loginAttemptService;
 
-    public LoginResponse login(AuthRequest request) {
-        authenticationManager.authenticate(
-            new VerifierAuthToken(request.getUsername(), request.getPassword())
-        );
+    public LoginResponse login(AuthRequest request, HttpServletRequest http) {
+        String ip = http.getRemoteAddr();
+
+        if(loginAttemptService.isBlockedPwd(request.getUsername(), ip)) {
+            throw new TooManyAttemptsException();
+        }
+
+        try {
+            authenticationManager.authenticate(
+                new VerifierAuthToken(request.getUsername(), request.getPassword())
+            );
+        } catch(BadCredentialsException e) {
+            loginAttemptService.failPwd(request.getUsername(), ip);
+            throw e;
+        }
+        
         
         var user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new NotFoundException());
         Integer userId = user.getId();
@@ -45,6 +61,8 @@ public class AuthenticationService {
             throw new BadCredentialsException("Account is not valid");
         }
 
+        loginAttemptService.resetPwd(request.getUsername(), ip);
+
         String preAuthJwt = jwtService.generatePreAuthToken(user);
 
         auditLogService.createLog(userId, "LOGGIN_ATTEMPT_BASIC");
@@ -52,10 +70,15 @@ public class AuthenticationService {
         return LoginResponse.builder().tempToken(preAuthJwt).build();
     }
 
-    public JwtAuthResponse verify2fa(TwoFaRequest request) {
-        
+    public JwtAuthResponse verify2fa(TwoFaRequest request, HttpServletRequest http) {
+
+        String ip = http.getRemoteAddr();
         String username = jwtService.extractUsername(request.getTempToken());
         var user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("No such username"));
+
+        if(loginAttemptService.isBlockedTotp(user.getId(), ip)) {
+            throw new TooManyAttemptsException();
+        }
 
         TotpAuthEntity totpAuthEntity = totpAuthRepository.findByUserId(user.getId());
 
@@ -65,11 +88,13 @@ public class AuthenticationService {
         boolean valid = googleAuthenticator.authorize(secret, code);
 
         auditLogService.createLog(user.getId(), "LOGGIN_ATTEMPT_2FA");
-
                                    
         if(!valid) {
+            loginAttemptService.failTotp(user.getId(), ip);
             throw new BadCredentialsException("Invalid 2FA code");
         }
+
+        loginAttemptService.resetTotp(user.getId(), ip);
 
         String jwt = jwtService.generateFullAuthToken(user);
         auditLogService.createLog(user.getId(), "LOGGIN_SUCCESS");

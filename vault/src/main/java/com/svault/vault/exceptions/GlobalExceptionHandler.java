@@ -1,5 +1,7 @@
 package com.svault.vault.exceptions;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,5 +20,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleGenericException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(TooManyAttemptsException.class)
+    public ResponseEntity<?> handleTooMany(TooManyAttemptsException ex) {
+        return ResponseEntity.status(429)
+                .body(Map.of("message", ex.getMessage()));
     }
 }

@@ -20,6 +20,7 @@ public class SecurityPolicyController {
     
     private final SecurityPolicyService securityPolicyService;
 
+    
     @PostMapping("/create")
     public ResponseEntity<SecurityPoliciesDTO> createSecurityPolicy(@RequestBody SecurityPoliciesDTO request) {
         return ResponseEntity.ok().body(securityPolicyService.createSecurityPolicy(request));

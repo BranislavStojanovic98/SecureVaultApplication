@@ -13,6 +13,7 @@ public class AuditLogMapper {
         dto.setEncryptedData(entity.getEncryptedData());
         dto.setPreviousHash(entity.getPreviousHash());
         dto.setCurrentHash(entity.getCurrentHash());
+        dto.setPayloadHash(entity.getPayloadHash());
         dto.setCreatedAt(entity.getCreatedAt());
 
         return dto;

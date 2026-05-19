@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,6 +72,7 @@ public class SecretController {
         return ResponseEntity.ok().body(secrets);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEAM_LEAD', 'ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<SecretDTO> createSecret(@RequestBody SecretDTO req,
                                                   @RequestHeader("Authorization") String authHeader) {
@@ -81,6 +83,7 @@ public class SecretController {
         return ResponseEntity.ok().body(secret);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEAM_LEAD', 'ADMIN')")
     @PostMapping("/create-with-share")
     public ResponseEntity<SecretDTO> createWithShare(@RequestBody CreateSecretWithShareRequest request,
                                                      Authentication auth) {
@@ -92,11 +95,13 @@ public class SecretController {
         );
     }
 
+
     @GetMapping("/shared-public-keys/{id}")
     public ResponseEntity<List<PublicKeyResponse>> getAllSharedPublicKeys(@PathVariable Integer id) {
         return ResponseEntity.ok().body(secretService.getAllPublicKeysFromSecretShare(id));
     }
 
+    @PreAuthorize("hasAuthority('TEAM_LEAD')")
     @PutMapping("/rotate-secret")
     public ResponseEntity<List<SecretDTO>> editSecret(@RequestBody List<CreateSecretWithShareRequest> request,
                                                 Authentication auth) {
@@ -108,6 +113,7 @@ public class SecretController {
         return ResponseEntity.ok().body(secrets);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEAM_LEAD', 'ADMIN')")
     @DeleteMapping("/deleteSecret/{id}")
     public void deleteSecret(@PathVariable Integer id, @RequestBody SecretDeleteRequest request) {
         secretService.deleteSecret(id, request);

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,18 +30,21 @@ public class TeamMemberController {
     
     private final TeamMemberService teamMemberService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/addmember")
     public ResponseEntity<TeamMemberDTO> createTeamMember(@RequestBody TeamMemberDTO request) {
         TeamMemberDTO saved = teamMemberService.addNewMember(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/edit")
     public ResponseEntity<String> changeRole(@RequestBody NewRoleRequest request) {
         teamMemberService.changeRole(request);
         return ResponseEntity.ok("Role successfully changed");
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/remove")
     public ResponseEntity<String> removeMember(@RequestBody TeamMemberId id) {
         teamMemberService.removeMember(id);

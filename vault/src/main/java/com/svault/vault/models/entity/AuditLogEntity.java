@@ -36,6 +36,9 @@ public class AuditLogEntity {
     @Column(name = "current_hash", nullable = false)
     private String currentHash;
 
+    @Column(name = "payload_hash", nullable = false)
+    private String payloadHash;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;

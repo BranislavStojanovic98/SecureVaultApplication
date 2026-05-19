@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.svault.vault.audit.AuditedAction;
 import com.svault.vault.models.entity.UserEntity;
 import com.svault.vault.services.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -37,16 +39,17 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody AuthRequest request) {
-        return ResponseEntity.ok(authenticationService.login(request));
+    public ResponseEntity<LoginResponse> login(@RequestBody AuthRequest request, HttpServletRequest http) {
+        return ResponseEntity.ok(authenticationService.login(request, http));
     }
 
     @PostMapping("/verify-2fa")
     public ResponseEntity<JwtAuthResponse> verify2fa(
         @RequestBody TwoFaRequest request,
+        HttpServletRequest http,
         HttpServletResponse response) {
 
-        JwtAuthResponse authResponse = authenticationService.verify2fa(request);
+        JwtAuthResponse authResponse = authenticationService.verify2fa(request, http);
 
         ResponseCookie cookie = ResponseCookie.from("jwt", authResponse.getToken())
                 .httpOnly(true)
@@ -73,6 +76,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(response);
     }
 
+    @AuditedAction("USER_LOGOUT")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
 

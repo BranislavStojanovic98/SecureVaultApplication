@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.models.dto.AuditLogDTO;
@@ -14,6 +16,7 @@ import com.svault.vault.repositories.AuditLogRepository;
 import com.svault.vault.repositories.UserRepository;
 import com.svault.vault.security.AuditLogCrypto;
 import com.svault.vault.security.CheckpointService;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +32,7 @@ public class AuditLogService {
     private static final int CHECKPOINT_INTERVAL = 10;
 
 
-    //TODO FIX Audit Log when rotating DEKs
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public AuditLogDTO createLog(Integer userId, String jsonPayload) {
         
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("No user for audti"));
@@ -37,11 +40,13 @@ public class AuditLogService {
         String payload = jsonPayload + " DONE BY USER " + userId;
         String encrypted = auditLogCrypto.encrypt(payload);
 
+        String payloadHash = auditLogCrypto.sha256(payload);
+
         AuditLogEntity last = auditLogRepository.findTopByOrderByIdDesc();
 
         String previousHash = (last != null) ? last.getCurrentHash() : "GENESIS";
 
-        String hashInput = userId + "|" + encrypted + "|" + previousHash;
+        String hashInput = userId + "|" + payloadHash + "|" + previousHash;
 
         String currentHash = auditLogCrypto.sha256(hashInput);
 
@@ -50,6 +55,7 @@ public class AuditLogService {
         log.setEncryptedData(encrypted);
         log.setPreviousHash(previousHash);
         log.setCurrentHash(currentHash);
+        log.setPayloadHash(payloadHash);
 
         AuditLogEntity saved = auditLogRepository.save(log);
 
@@ -62,7 +68,7 @@ public class AuditLogService {
 
     public boolean verifyChain() {
 
-        List<AuditLogEntity> logs = auditLogRepository.findAll();
+        List<AuditLogEntity> logs = auditLogRepository.findAllByOrderByIdAsc();
         List<AuditLogDTO> logsDto = logs.stream().map(AuditLogMapper::toDto).collect(Collectors.toList());
 
         String previous = "GENESIS";
@@ -72,7 +78,7 @@ public class AuditLogService {
             String recalculated =
                     auditLogCrypto.sha256(
                             log.getUserId() + "|" +
-                            log.getEncryptedData() + "|" +
+                            log.getPayloadHash() + "|" +
                             previous
                     );
 

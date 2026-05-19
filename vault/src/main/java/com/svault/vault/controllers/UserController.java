@@ -41,6 +41,7 @@ public class UserController {
         return ResponseEntity.ok().body(userService.getAllUsers(userId));
     }
 
+    //TODO Nastavi sa postavljanjem @PreAuthorize("hasAuthority('KOJIGOD')")
     @PutMapping("/edit/{id}")
     public ResponseEntity<UserDTO> editUser(@PathVariable Integer id, @RequestBody UserDTO entity) {
         UserDTO saved = userService.editUser(id, entity);

@@ -13,5 +13,6 @@ public class AuditLogDTO {
     private String decryptedPayload;
     private String previousHash;
     private String currentHash;
+    private String payloadHash;
     private Instant createdAt;
 }

@@ -82,4 +82,9 @@ public class TeamService {
 
         teamMemberService.addNewMember(admin);
     }
+
+    public void deleteTeam(Integer id) {
+        TeamEntity team = teamRepository.findById(id).orElseThrow(() -> new NotFoundException());
+        teamRepository.delete(team);
+    }
 }

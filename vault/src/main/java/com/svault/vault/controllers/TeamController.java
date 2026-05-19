@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,9 +61,17 @@ public class TeamController {
         return ResponseEntity.ok().body(teamService.findAllTeamsUserCreated(userId));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/edit/{id}")
     public ResponseEntity<TeamDTO> editTeam(@PathVariable Integer id, @RequestBody TeamDTO request) {
         TeamDTO saved = teamService.editTeam(id, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/remove/{id}")
+    public ResponseEntity<?> deleteTeam(@PathVariable Integer id) {
+        teamService.deleteTeam(id);
+        return ResponseEntity.ok().body(null);
     }
 }
