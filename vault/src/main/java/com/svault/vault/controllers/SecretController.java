@@ -42,6 +42,7 @@ public class SecretController {
         return ResponseEntity.ok().body(dto);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEAM_LEAD', 'ADMIN', 'DEVELOPER')")    
     @GetMapping("/byUser")
     public ResponseEntity<List<UserSecretDTO>> getSecretsByUserId(
             Authentication auth) {
@@ -63,6 +64,7 @@ public class SecretController {
     }
 
 
+    //Honeytoken get
     @GetMapping("/byTeam/{id}")
     public ResponseEntity<List<SecretDTO>> getSecretsByTeamId(@PathVariable Integer id, Authentication auth) {
 

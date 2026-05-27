@@ -51,11 +51,13 @@ public class TeamMemberController {
         return ResponseEntity.ok("User successfully removed");
     }
 
+    //Not in use
     @GetMapping("/getAllTeams/{id}")
     public ResponseEntity<List<TeamMemberDTO>> getAllTeamsUserIsMember(@PathVariable Integer id) {
         return ResponseEntity.ok().body(teamMemberService.getAllTeamsUserIsIn(id));
     }
 
+    @PreAuthorize("hasAuthority('TEAM_LEAD')")    
     @GetMapping("/my")
     public ResponseEntity<List<TeamMemberDTO>> getAllTeamsForUser(Authentication authentication) {
         
@@ -65,6 +67,7 @@ public class TeamMemberController {
         return ResponseEntity.ok().body(teamMemberService.getAllTeamsUserIsIn(userId));
     }
 
+    @PreAuthorize("hasAnyAuthority('TEAM_LEAD', 'ADMIN', 'DEVELOPER')")    
     @GetMapping("/getTeammatesFor/{teamId}")
     public ResponseEntity<List<TeamMemberDTO>> getAllTeamMembers(@PathVariable Integer teamId) {
         return ResponseEntity.ok().body(teamMemberService.getAllTeamMembers(teamId));

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +35,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/everyone")
     public ResponseEntity<List<UserDTO>> getAllUsers(Authentication auth) {
         UserEntity user = (UserEntity) auth.getPrincipal();
@@ -41,31 +43,35 @@ public class UserController {
         return ResponseEntity.ok().body(userService.getAllUsers(userId));
     }
 
-    //TODO Nastavi sa postavljanjem @PreAuthorize("hasAuthority('KOJIGOD')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/edit/{id}")
     public ResponseEntity<UserDTO> editUser(@PathVariable Integer id, @RequestBody UserDTO entity) {
         UserDTO saved = userService.editUser(id, entity);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/activate/{id}")
     public ResponseEntity<UserDTO> activateUser(@PathVariable Integer id) {
         userService.activateUser(id);
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/deactivate/{id}")
     public ResponseEntity<UserDTO> deactivateUser(@PathVariable Integer id) {
         userService.deactivateUser(id);
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/freeze/{id}")
     public ResponseEntity<UserDTO> freezeUser(@PathVariable Integer id) {
         userService.freezeUser(id);
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/unfreeze/{id}")
     public ResponseEntity<UserDTO> unfreezeUser(@PathVariable Integer id) {
         userService.unfreezeUser(id);

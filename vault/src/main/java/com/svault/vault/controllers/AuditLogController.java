@@ -26,11 +26,13 @@ public class AuditLogController {
     private final AuditLogService auditLogService;
     private final UserService userService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")    
     @GetMapping("/verify")
     public boolean verify() {
         return auditLogService.verifyChain();
     }
 
+    @PreAuthorize("hasAnyAuthority('TEAM_LEAD', 'ADMIN', 'DEVELOPER')")    
     @PostMapping("/decrypt")
     public void logDecrypt(@RequestBody DecryptAuditRequest req,
                         Authentication auth) {

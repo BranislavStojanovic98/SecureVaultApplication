@@ -29,6 +29,7 @@ public class TeamController {
     private final TeamService teamService;
     private final JwtService jwtService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<TeamDTO> createTeam(@RequestBody TeamDTO request) {
         TeamDTO saved = teamService.createTeam(request);
@@ -36,22 +37,26 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/allteams")
     public ResponseEntity<List<TeamDTO>> getAllTeams() {
         return ResponseEntity.ok().body(teamService.getAllTeams());
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/teamno/{id}")
     public ResponseEntity<TeamDTO> getCertainTeam(@PathVariable Integer id) {
         return ResponseEntity.ok().body(teamService.getCertainTeam(id));
     }
 
+    //Not in use
     @GetMapping("/createdTeam/{id}")
     public ResponseEntity<List<TeamDTO>> getAllTeamsUserBelongsTo(@PathVariable Integer id) {
         List<TeamDTO> allTeams = teamService.findAllTeamsUserCreated(id);
         return ResponseEntity.ok().body(allTeams);
     }
 
+    //Not in use
     @GetMapping("/my")
     public ResponseEntity<List<TeamDTO>> getAllTeamsForUser(@RequestHeader("Authorization") String authHeader) {
         
