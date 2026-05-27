@@ -39,6 +39,7 @@ public class SecurityConfig {
                     .requestMatchers("/auth/salt").permitAll()
                     .requestMatchers("/auth/login").permitAll()
                     .requestMatchers("/auth/verify-2fa").permitAll()
+                    .requestMatchers("/user/create").permitAll()
                     .anyRequest().authenticated()
         )
         .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
