@@ -4,3 +4,4 @@ db/
 auditCheckpoints/
 keys/
 .env
+certs/
