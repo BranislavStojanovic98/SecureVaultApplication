@@ -8,13 +8,11 @@ import com.svault.vault.config.JwtService;
 import com.svault.vault.exceptions.NotFoundException;
 import com.svault.vault.exceptions.TooManyAttemptsException;
 import com.svault.vault.models.entity.TotpAuthEntity;
-import com.svault.vault.models.entity.UserEntity;
 import com.svault.vault.redis.LoginAttemptService;
+import com.svault.vault.redis.TokenBlacklistService;
 import com.svault.vault.repositories.TotpAuthRepository;
 import com.svault.vault.repositories.UserRepository;
 import com.svault.vault.services.AuditLogService;
-import com.svault.vault.util.ChallengeStore;
-import com.svault.vault.util.CryptoService;
 import com.svault.vault.util.EncryptionService;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 
@@ -29,11 +27,10 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final TotpAuthRepository totpAuthRepository;
     private final JwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
     private final AuthenticationManager authenticationManager;
     private final EncryptionService encryptionService;
     private final GoogleAuthenticator googleAuthenticator;
-    private final ChallengeStore challengeStore;
-    private final CryptoService cryptoService;
     private final AuditLogService auditLogService;
     private final LoginAttemptService loginAttemptService;
 
@@ -102,32 +99,16 @@ public class AuthenticationService {
         return JwtAuthResponse.builder().token(jwt).salt(user.getSalt()).build();
     }
 
-    public JwtAuthResponse verifySignature(SignatureRequest req) {
+    public void addToBlackilst(String token) {
+        if (token != null && !token.isBlank()) {
 
-        String username = req.getUsername();
+        String jti = jwtService.extractTokenId(token);
 
-        String nonce = challengeStore.get(username);
+        long remainingTime = jwtService.extractExpirationTime(token) - System.currentTimeMillis();
 
-        if (nonce == null) {
-            throw new BadCredentialsException("Challenge expired or missing");
+        if (remainingTime > 0) {
+            tokenBlacklistService.blacklist(jti, remainingTime);
         }
-
-        UserEntity user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new NotFoundException("User not found"));
-
-        boolean valid = cryptoService.verifySignature(nonce, req.getSignature(), user.getPublicKey());
-
-        if(!valid) {
-            throw new BadCredentialsException("Invalid Signature");
-        }
-
-        challengeStore.remove(username);
-
-        String jwt = jwtService.generateFullAuthToken(user);
-
-        return JwtAuthResponse.builder()
-            .token(jwt)
-            .salt(user.getSalt())
-            .build();
+    }
     }
 }

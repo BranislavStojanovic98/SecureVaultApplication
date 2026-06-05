@@ -11,11 +11,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.svault.vault.config.JwtService;
 import com.svault.vault.models.dto.TeamDTO;
 import com.svault.vault.services.TeamService;
 
@@ -27,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 public class TeamController {
     
     private final TeamService teamService;
-    private final JwtService jwtService;
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
@@ -47,23 +44,6 @@ public class TeamController {
     @GetMapping("/teamno/{id}")
     public ResponseEntity<TeamDTO> getCertainTeam(@PathVariable Integer id) {
         return ResponseEntity.ok().body(teamService.getCertainTeam(id));
-    }
-
-    //Not in use
-    @GetMapping("/createdTeam/{id}")
-    public ResponseEntity<List<TeamDTO>> getAllTeamsUserBelongsTo(@PathVariable Integer id) {
-        List<TeamDTO> allTeams = teamService.findAllTeamsUserCreated(id);
-        return ResponseEntity.ok().body(allTeams);
-    }
-
-    //Not in use
-    @GetMapping("/my")
-    public ResponseEntity<List<TeamDTO>> getAllTeamsForUser(@RequestHeader("Authorization") String authHeader) {
-        
-        String token = authHeader.substring(7);
-        Integer userId = jwtService.extractUserId(token);
-        
-        return ResponseEntity.ok().body(teamService.findAllTeamsUserCreated(userId));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

@@ -6,11 +6,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.svault.vault.models.dto.UserDTO;
+import com.svault.vault.redis.TokenBlacklistService;
 import com.svault.vault.services.UserService;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -26,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthenticationFilter extends OncePerRequestFilter{
     
     private final JwtService jwtService;
+    private final TokenBlacklistService blacklistService;
     private final UserService userService;
 
     @Override
@@ -33,10 +36,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
                                     HttpServletResponse response, 
                                     FilterChain filterChain) throws ServletException, IOException {
         String jwt = extractJwt(request);
+        String jti = null;
         String username = null;
+
+
 
         if(StringUtils.isNotEmpty(jwt)) {
             try {
+                jti = jwtService.extractTokenId(jwt);
                 username = jwtService.extractUsername(jwt);
             } catch(ExpiredJwtException e) {
                 SecurityContextHolder.clearContext();
@@ -47,6 +54,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
                 response.addCookie(cookieJwt);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("TOKEN_EXPIRED");
+                return;
+            }
+
+            if (blacklistService.isBlackListed(jti)) {
+                SecurityContextHolder.clearContext();
+
+                Cookie cookieJwt = new Cookie("jwt", null);
+                cookieJwt.setPath("/");
+                cookieJwt.setMaxAge(0);
+                response.addCookie(cookieJwt);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("TOKEN_REVOKED");
                 return;
             }
         }

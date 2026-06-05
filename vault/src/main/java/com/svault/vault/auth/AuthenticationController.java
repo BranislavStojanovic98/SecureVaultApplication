@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -78,7 +79,11 @@ public class AuthenticationController {
 
     @AuditedAction("USER_LOGOUT")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
+    public ResponseEntity<?> logout(
+        @CookieValue(value = "jwt", required = false) String token,
+        HttpServletResponse response) {
+            
+        authenticationService.addToBlackilst(token);
 
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
@@ -91,12 +96,6 @@ public class AuthenticationController {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok("Logged out");
-    }
-
-    @PostMapping("/verifySiginture")
-    public ResponseEntity<JwtAuthResponse> verifySignature(@RequestBody SignatureRequest req) {
-        return ResponseEntity.ok(authenticationService.verifySignature(req));
-        
     }
 
     @PostMapping("/verify-master")

@@ -4,6 +4,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 import javax.crypto.SecretKey;
@@ -31,6 +32,14 @@ public class JwtService {
 
     public Integer extractUserId(String token) {
         return extractClaim(token, claims -> claims.get("id", Integer.class));
+    }
+
+    public String extractTokenId(String token) {
+        return extractClaim(token, claims -> claims.get("jti", String.class));
+    }
+
+    public long extractExpirationTime(String token) {
+        return extractClaim(token, claims -> claims.getExpiration().getTime());
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolve) {
@@ -78,6 +87,7 @@ public class JwtService {
         }
         return Jwts.builder().claims(extraClaims)
                              .subject(userDetails.getUsername())
+                             .id(UUID.randomUUID().toString())
                              .issuedAt(new Date(System.currentTimeMillis()))
                              .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))  // TODO namjesti vrijeme trajanja tokena, sada je 30 min
                              .signWith(getSigningKey())
